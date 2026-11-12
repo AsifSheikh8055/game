@@ -1,0 +1,12 @@
+{
+  "name": "mines-razorpay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mines demo with Razorpay Checkout on Vercel",
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.4"
+  }
+}
