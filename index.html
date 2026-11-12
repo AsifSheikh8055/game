@@ -38,7 +38,7 @@ body {
   font-size: 14px;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -51,1197 +51,693 @@ img { display: block; max-width: 100%; }
 ::-webkit-scrollbar-thumb:hover { background: #3d5666; }
 
 /* ============================================================
-   APP SHELL
+   PRELOADER SCREENS
    ============================================================ */
-.app { display: flex; min-height: 100vh; width: 100%; }
-
-.main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+#preloader-overlay {
+  position: fixed; inset: 0; z-index: 99999; background: #0f212e;
+  display: flex; flex-direction: column; transition: opacity 0.6s ease;
 }
+
+#security-screen {
+  background: #ffffff; color: #333; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.security-content { max-width: 600px; width: 100%; margin-top: 10vh; }
+.security-logo { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 30px; }
+.security-logo svg { width: 44px; height: 44px; background: #1a1a1a; color: #fff; padding: 8px; border-radius: 8px; }
+.security-content h1 { font-size: 26px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; line-height: 1.2; }
+.security-content p { font-size: 16px; color: #4a4a4a; line-height: 1.6; margin-bottom: 30px; }
+
+.verify-box {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px 20px;
+  background: #fafafa; width: 100%; max-width: 400px;
+}
+.verify-left { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #333; }
+.spinner-light { width: 20px; height: 20px; border: 2px solid #e0e0e0; border-top-color: #4a4a4a; border-radius: 50%; animation: spin 1s linear infinite; }
+.verify-right { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; font-weight: 500; }
+
+#loading-screen {
+  background: var(--bg); width: 100%; height: 100%; display: none;
+  flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+}
+.loader-logo { color: var(--green); animation: logoPulse 2s ease-in-out infinite; filter: drop-shadow(0 0 15px rgba(0, 231, 1, 0.3)); }
+.spinner-dark { width: 32px; height: 32px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes logoPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
 
 /* ============================================================
-   LEFT SIDEBAR
+   MAIN APP
    ============================================================ */
+#game-wrapper { display: none; width: 100%; height: 100%; }
+.app { display: flex; min-height: 100vh; width: 100%; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; width: 100%; }
+
+/* SIDEBAR */
 .sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background: var(--panel);
-  border-right: 1px solid var(--border-soft);
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 24px;
+  width: 260px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border-soft);
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 24px;
 }
-
-.sidebar-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-}
-
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  transition: .15s;
-}
+.sidebar-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; border: none; background: transparent; color: var(--text-2); transition: .15s; }
 .icon-btn:hover { background: var(--panel-2); color: var(--text); }
-
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--green);
-}
-
-.product-switch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 0 16px 14px;
-}
-.product-btn {
-  padding: 9px 0;
-  border-radius: 6px;
-  border: none;
-  background: var(--panel-2);
-  color: var(--text-2);
-  font-weight: 700;
-  font-size: 13px;
-  transition: .15s;
-}
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; color: var(--green); }
+.product-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 16px 14px; }
+.product-btn { padding: 9px 0; border-radius: 6px; border: none; background: var(--panel-2); color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s; }
 .product-btn.active { background: var(--panel-3); color: var(--text); }
 .product-btn:hover { color: var(--text); }
-
 .sidebar-nav { display: flex; flex-direction: column; padding: 0 8px; }
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 6px;
-  color: var(--text-2);
-  font-weight: 600;
-  font-size: 13px;
-  transition: .12s;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; color: var(--text-2); font-weight: 600; font-size: 13px; transition: .12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nav-item:hover { background: var(--panel-2); color: var(--text); }
 .nav-item svg { flex-shrink: 0; color: var(--text-3); transition: .12s; }
 .nav-item:hover svg { color: var(--text); }
-
 .nav-divider { height: 1px; background: var(--border-soft); margin: 10px 8px; }
 .nav-label { padding: 8px 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
 
-/* ============================================================
-   TOP BAR
-   ============================================================ */
-.topbar {
-  height: 60px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border-soft);
-  position: sticky;
-  top: 0;
-  z-index: 60;
-}
-
-.topbar-right { display: flex; gap: 8px; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 18px;
-  border-radius: var(--radius);
-  border: none;
-  font-weight: 700;
-  font-size: 14px;
-  transition: .15s;
-  white-space: nowrap;
-}
+/* TOP BAR */
+.topbar { height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--panel); border-bottom: 1px solid var(--border-soft); position: sticky; top: 0; z-index: 60; }
+.topbar-right { display: flex; gap: 12px; align-items: center; }
+.wallet-display { display: flex; align-items: center; gap: 8px; background: var(--panel-2); border: 1px solid var(--panel-3); padding: 8px 16px; border-radius: var(--radius); font-weight: 800; font-size: 15px; color: var(--green); font-variant-numeric: tabular-nums; transition: background .2s; }
+.wallet-display svg { width: 16px; height: 16px; color: var(--text-3); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 24px; border-radius: var(--radius); border: none; font-weight: 700; font-size: 14px; transition: .15s; white-space: nowrap; }
 .btn:active { transform: scale(.98); }
-
-.btn-ghost { background: var(--panel-3); color: var(--text); }
-.btn-ghost:hover { background: #3a5466; }
 .btn-green { background: var(--green); color: var(--green-txt); }
 .btn-green:hover { background: var(--green-hi); }
-.btn.small { padding: 7px 12px; font-size: 12px; }
 
-/* ============================================================
-   PAGE CONTENT
-   ============================================================ */
-.page {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* PAGE CONTENT */
+.page { width: 100%; max-width: 1440px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); width: 100%; }
 
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  width: 100%;
-}
-
-/* ============================================================
-   GAME FRAME
-   ============================================================ */
-.game-frame {
-  background: var(--panel);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  width: 100%;
-}
-
+/* GAME FRAME */
+.game-frame { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); overflow: hidden; width: 100%; }
 .game-frame-inner { display: flex; align-items: stretch; width: 100%; }
-
-/* ---------- Game sidebar (bet controls) ---------- */
-.game-sidebar {
-  width: 300px;
-  flex-shrink: 0;
-  padding: 14px;
-  border-right: 1px solid var(--border-soft);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+.game-sidebar { width: 300px; flex-shrink: 0; padding: 14px; border-right: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 14px; }
 .seg-tabs { display: flex; background: var(--panel-2); border-radius: 100px; padding: 4px; gap: 4px; }
-.seg-tab {
-  flex: 1; padding: 8px 0; border-radius: 100px; border: none; background: transparent;
-  color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s;
-}
+.seg-tab { flex: 1; padding: 8px 0; border-radius: 100px; border: none; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s; }
 .seg-tab.active { background: var(--panel-3); color: var(--text); }
-.seg-tab:hover { color: var(--text); }
-
 .field { display: flex; flex-direction: column; gap: 6px; }
 .input-row { display: flex; gap: 6px; }
-
-.input-wrap {
-  flex: 1; display: flex; align-items: center; gap: 8px; background: var(--panel-2);
-  border: 1px solid var(--panel-3); border-radius: var(--radius); padding: 0 10px;
-  height: 42px; transition: border-color .15s;
-}
+.input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--panel-2); border: 1px solid var(--panel-3); border-radius: var(--radius); padding: 0 10px; height: 42px; transition: border-color .15s; }
 .input-wrap:focus-within { border-color: #4a6b7f; }
 .input-wrap .prefix { color: var(--text-3); font-weight: 600; }
-
-.input-wrap input {
-  flex: 1; min-width: 0; background: transparent; border: none; outline: none;
-  color: var(--text); font-size: 15px; font-weight: 600; font-family: inherit;
-}
-.input-wrap input::-webkit-outer-spin-button,
-.input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.input-wrap input[type=number] { -moz-appearance: textfield; }
-
-.chip-btn {
-  width: 42px; height: 42px; border-radius: var(--radius); border: none;
-  background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 14px; transition: .15s;
-}
+.input-wrap input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font-size: 15px; font-weight: 600; font-family: inherit; }
+.chip-btn { width: 42px; height: 42px; border-radius: var(--radius); border: none; background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 14px; transition: .15s; }
 .chip-btn:hover { background: #3a5466; }
-
 .field-meta { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text-3); }
-
 .mines-control { display: flex; flex-direction: column; gap: 10px; }
 .mines-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text-3); }
 .mines-slider-row { display: flex; align-items: center; gap: 12px; }
-.mines-count {
-  width: 44px; height: 36px; display: flex; align-items: center; justify-content: center;
-  background: var(--panel-2); border: 1px solid var(--panel-3); border-radius: var(--radius);
-  font-weight: 700; font-size: 15px; flex-shrink: 0;
-}
-
-input[type=range] {
-  -webkit-appearance: none; appearance: none; flex: 1; height: 5px; border-radius: 3px;
-  background: linear-gradient(to right, var(--green) 0 var(--pct, 10%), var(--panel-3) var(--pct, 10%) 100%);
-  outline: none; cursor: pointer;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-  background: #fff; border: 3px solid var(--green); cursor: grab; transition: transform .1s;
-}
-input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.1); }
-input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--green); cursor: grab; }
-
-.btn-bet {
-  height: 46px; width: 100%; border: none; border-radius: var(--radius);
-  background: var(--green); color: var(--green-txt); font-weight: 800; font-size: 15px; transition: .15s;
-}
+.mines-count { width: 44px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--panel-2); border: 1px solid var(--panel-3); border-radius: var(--radius); font-weight: 700; font-size: 15px; flex-shrink: 0; }
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; height: 5px; border-radius: 3px; background: linear-gradient(to right, var(--green) 0 var(--pct, 10%), var(--panel-3) var(--pct, 10%) 100%); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--green); cursor: grab; transition: transform .1s; }
+.btn-bet { height: 46px; width: 100%; border: none; border-radius: var(--radius); background: var(--green); color: var(--green-txt); font-weight: 800; font-size: 15px; transition: .15s; }
 .btn-bet:hover { background: var(--green-hi); }
 .btn-bet.cashout { background: #ffb020; color: #2b1a00; }
 .btn-bet.cashout:hover { background: #ffc14d; }
-.btn-bet:disabled { opacity: .5; cursor: not-allowed; }
-
-.btn-secondary {
-  height: 42px; width: 100%; border: none; border-radius: var(--radius);
-  background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 13px; transition: .15s;
-}
+.btn-secondary { height: 42px; width: 100%; border: none; border-radius: var(--radius); background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 13px; transition: .15s; }
 .btn-secondary:hover:not(:disabled) { background: #3a5466; }
 .btn-secondary:disabled { opacity: .45; cursor: not-allowed; }
 
-/* ---------- Game content ---------- */
-.game-content {
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  padding: 28px 24px;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  width: min(100%, 560px);
-  aspect-ratio: 1;
-}
-
-.tile {
-  position: relative; border: none; background: none; padding: 0; aspect-ratio: 1;
-  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-}
-
-.tile-front {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  border-radius: var(--radius); background: linear-gradient(160deg, #2c4353 0%, #1d2f3b 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 4px 0 #152430;
-  transition: transform .12s, filter .12s, background .2s, box-shadow .2s;
-}
+/* GAME CONTENT (BOARD) */
+.game-content { flex: 1; min-width: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 28px 24px; }
+.board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: min(100%, 560px); aspect-ratio: 1; }
+.tile { position: relative; border: none; background: none; padding: 0; aspect-ratio: 1; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.tile-front { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius); background: linear-gradient(160deg, #2c4353 0%, #1d2f3b 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 4px 0 #152430; transition: transform .12s, filter .12s, background .2s, box-shadow .2s; }
 .tile:hover:not(.revealed):not(:disabled) .tile-front { filter: brightness(1.25); transform: translateY(-2px); }
-.tile:active:not(.revealed) .tile-front { transform: translateY(1px); }
-
 .tile.revealed .tile-front { animation: tilePop .22s ease; }
-.tile.gem .tile-front {
-  background: linear-gradient(160deg, #1e5b3a 0%, #123a26 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #0b2417;
-}
-.tile.mine .tile-front {
-  background: linear-gradient(160deg, #6b1f1f 0%, #3d1010 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #260a0a;
-}
+.tile.gem .tile-front { background: linear-gradient(160deg, #1e5b3a 0%, #123a26 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #0b2417; }
+.tile.mine .tile-front { background: linear-gradient(160deg, #6b1f1f 0%, #3d1010 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #260a0a; }
 .tile.dim .tile-front { opacity: .4; }
-
 @keyframes tilePop { 0% { transform: scale(.82); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
-
 .board.shake { animation: boardShake .4s ease; }
-@keyframes boardShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
-}
-
-.board-controls {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  width: min(100%, 560px);
-}
-
-.text-btn {
-  display: inline-flex; align-items: center; gap: 6px; border: none; background: transparent;
-  color: var(--text); font-weight: 700; font-size: 13px; padding: 8px 10px; border-radius: 6px; transition: .15s;
-}
-.text-btn:hover:not(:disabled) { color: var(--text-2); }
+@keyframes boardShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+.board-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(100%, 560px); }
+.text-btn { display: inline-flex; align-items: center; gap: 6px; border: none; background: transparent; color: var(--text); font-weight: 700; font-size: 13px; padding: 8px 10px; border-radius: 6px; transition: .15s; }
 .text-btn:disabled { opacity: .4; cursor: not-allowed; }
 .text-btn svg { color: var(--text-2); }
+.multiplier-display { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 14px; border-radius: 6px; }
+.multiplier-display .mult-label { font-size: 11px; font-weight: 700; color: var(--text-3); }
+.multiplier-display .mult-value { font-size: 15px; font-weight: 800; color: var(--text); }
 
-.multiplier-display { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 14px; border-radius: 6px; cursor: default; transition: .15s; }
-.multiplier-display:hover { background: var(--panel-2); }
-.multiplier-display .mult-label { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .03em; }
-.multiplier-display .mult-value { font-size: 15px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
-
-/* ---------- Game footer bar ---------- */
-.game-footer-bar {
-  position: relative; display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px; border-top: 1px solid var(--border-soft); min-height: 52px;
-}
+/* GAME FOOTER */
+.game-footer-bar { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 1px solid var(--border-soft); min-height: 52px; }
 .footer-left { display: flex; align-items: center; gap: 2px; }
-.footer-center {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  color: var(--text-3); display: flex; align-items: center; gap: 6px; pointer-events: none;
-}
-.footer-center span { font-weight: 800; letter-spacing: .02em; font-size: 15px; color: var(--text-2); }
+.footer-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--text-3); display: flex; align-items: center; gap: 6px; pointer-events: none; }
+.footer-center span { font-weight: 800; font-size: 15px; color: var(--text-2); }
+.btn-fairness { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--radius); border: none; background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 13px; transition: .15s; }
 
-.btn-fairness {
-  display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--radius);
-  border: none; background: var(--panel-3); color: var(--text); font-weight: 700; font-size: 13px; transition: .15s;
-}
-.btn-fairness:hover { background: #3a5466; }
-.btn-fairness svg { color: var(--text-2); }
-
-/* ============================================================
-   META LAYOUT
-   ============================================================ */
-.meta-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 350px;
-  gap: 16px;
-  align-items: start;
-  width: 100%;
-}
-
+/* META LAYOUT */
+.meta-layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 16px; align-items: start; width: 100%; }
 .game-meta { padding: 16px; }
-
-.publisher-row {
-  display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border-soft);
-}
-.publisher-logo {
-  width: 56px; height: 56px; border-radius: var(--radius); background: var(--panel-2);
-  display: flex; align-items: center; justify-content: center; color: var(--green); flex-shrink: 0;
-}
+.publisher-row { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border-soft); }
+.publisher-logo { width: 56px; height: 56px; border-radius: var(--radius); background: var(--panel-2); display: flex; align-items: center; justify-content: center; color: var(--green); flex-shrink: 0; }
 .publisher-info { flex: 1; min-width: 0; }
 .publisher-name { font-size: 16px; font-weight: 800; display: block; }
 .publisher-followers { font-size: 13px; color: var(--text-3); margin-top: 2px; }
-.publisher-followers strong { color: var(--text); font-weight: 700; }
-
 .meta-title-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; flex-wrap: wrap; }
 .meta-title-row h1 { font-size: 22px; font-weight: 800; }
-
 .meta-live { display: flex; align-items: center; gap: 14px; color: var(--text-2); font-size: 13px; flex: 1; flex-wrap: wrap; }
-.live-dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px;
-  box-shadow: 0 0 0 0 rgba(0,231,1,.5); animation: pulse 1.6s infinite;
-}
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(0,231,1,.45); }
-  70% { box-shadow: 0 0 0 7px rgba(0,231,1,0); }
-  100% { box-shadow: 0 0 0 0 rgba(0,231,1,0); }
-}
-
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; box-shadow: 0 0 0 0 rgba(0,231,1,.5); animation: pulse 1.6s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,231,1,.45); } 70% { box-shadow: 0 0 0 7px rgba(0,231,1,0); } 100% { box-shadow: 0 0 0 0 rgba(0,231,1,0); } }
 .meta-tabs { display: flex; gap: 4px; background: var(--panel-2); border-radius: 100px; padding: 4px; width: fit-content; margin-bottom: 16px; }
 .meta-tab { padding: 8px 18px; border-radius: 100px; border: none; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s; }
 .meta-tab.active { background: var(--panel-3); color: var(--text); }
-.meta-tab:hover { color: var(--text); }
-
 .desc-top { display: flex; gap: 16px; margin-bottom: 18px; }
-.desc-thumb {
-  width: 130px; aspect-ratio: 3 / 4; border-radius: var(--radius); flex-shrink: 0;
-  background: radial-gradient(circle at 20% 10%, #3231eb 0%, transparent 55%), radial-gradient(circle at 80% 20%, #9d32cb 0%, transparent 55%), radial-gradient(circle at 30% 70%, #005fed 0%, transparent 60%), radial-gradient(circle at 80% 90%, #3fc1ae 0%, transparent 55%), #101c28;
-}
+.desc-thumb { width: 130px; aspect-ratio: 3 / 4; border-radius: var(--radius); flex-shrink: 0; background: radial-gradient(circle at 20% 10%, #3231eb 0%, transparent 55%), radial-gradient(circle at 80% 20%, #9d32cb 0%, transparent 55%), radial-gradient(circle at 30% 70%, #005fed 0%, transparent 60%), radial-gradient(circle at 80% 90%, #3fc1ae 0%, transparent 55%), #101c28; }
 .desc-tags { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
 .badge { padding: 5px 11px; border-radius: 100px; background: var(--panel-2); border: 1px solid var(--border-soft); font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
 .badge strong { color: var(--text); }
-
 .desc-text h2 { font-size: 16px; font-weight: 800; margin: 20px 0 8px; }
-.desc-text h2:first-child { margin-top: 0; }
 .desc-text p { color: var(--text-2); font-size: 13.5px; line-height: 1.6; margin-bottom: 10px; }
-
 .info-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
 .info-table tr:nth-child(odd) { background: var(--panel-2); }
 .info-table td { padding: 9px 14px; color: var(--text-2); }
 .info-table td:first-child { font-weight: 700; color: var(--text); width: 45%; }
-.info-table tr { border-radius: 6px; }
 
+/* RECOMMENDATIONS */
 .recommendations { padding: 14px; }
 .rec-header { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; padding-bottom: 12px; color: var(--text); }
 .rec-header svg { color: var(--text-3); }
-.rec-header .chev { margin-left: auto; color: var(--text-2); }
+.rec-list { display: flex; flex-direction: column; gap: 10px; }
+.rec-card {
+  position: relative; border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  aspect-ratio: 16 / 9; background: var(--panel-2); border: 1px solid var(--border-soft);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.rec-thumb {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.rec-card:hover .rec-thumb { transform: scale(1.08); }
+.rec-content {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 12px 14px;
+}
+.rec-content h3 { font-size: 14.5px; font-weight: 800; color: #fff; margin-bottom: 2px; line-height: 1.2; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.rec-provider { font-size: 12px; color: var(--text-2); font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+.rec-players { font-size: 11px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; }
 
-.rec-list { display: flex; flex-direction: column; gap: 6px; }
-.rec-card { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 8px; border-radius: var(--radius); transition: background .15s; cursor: pointer; }
-.rec-card:hover { background: var(--panel-2); }
-.rec-thumb { aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; }
-
-.rec-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-.rec-info h3 { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rec-provider { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-.rec-players { display: flex; align-items: center; font-size: 11px; color: var(--text-3); margin-top: 6px; }
-
-/* gradient thumbnails */
-.g1 { background: radial-gradient(circle at 25% 20%, #e2a2db, transparent 60%), radial-gradient(circle at 80% 30%, #9190c6, transparent 60%), radial-gradient(circle at 50% 90%, #f9a6ca, transparent 60%), #2a2040; }
-.g2 { background: radial-gradient(circle at 20% 25%, #5a78dd, transparent 60%), radial-gradient(circle at 75% 20%, #7f5cea, transparent 60%), radial-gradient(circle at 55% 85%, #a8e8e8, transparent 60%), #1d2340; }
-.g3 { background: radial-gradient(circle at 25% 20%, #f0a8e7, transparent 60%), radial-gradient(circle at 80% 30%, #ffd6c0, transparent 60%), radial-gradient(circle at 50% 90%, #e7b5e1, transparent 60%), #3a2430; }
-.g4 { background: radial-gradient(circle at 20% 20%, #3ba4ff, transparent 60%), radial-gradient(circle at 80% 40%, #ccc8f1, transparent 60%), radial-gradient(circle at 50% 90%, #c6ada2, transparent 60%), #16273d; }
-.g5 { background: radial-gradient(circle at 25% 25%, #c2ebb1, transparent 60%), radial-gradient(circle at 75% 25%, #a4d3d6, transparent 60%), radial-gradient(circle at 50% 85%, #d7b1ad, transparent 60%), #1d2e2a; }
-.g6 { background: radial-gradient(circle at 25% 20%, #af005c, transparent 60%), radial-gradient(circle at 75% 30%, #a26a50, transparent 60%), radial-gradient(circle at 50% 85%, #d7b738, transparent 60%), #2b1524; }
-.g7 { background: radial-gradient(circle at 25% 20%, #ffc574, transparent 60%), radial-gradient(circle at 75% 30%, #f0b271, transparent 60%), radial-gradient(circle at 50% 85%, #9dad79, transparent 60%), #33291c; }
-.g8 { background: radial-gradient(circle at 25% 20%, #f1936e, transparent 60%), radial-gradient(circle at 75% 30%, #c57d67, transparent 60%), radial-gradient(circle at 50% 85%, #ffd87f, transparent 60%), #33211c; }
-
-/* ============================================================
-   BETS BOARD & TABLE
-   ============================================================ */
+/* BETS BOARD */
 .bets-board { padding: 16px; width: 100%; overflow: hidden; }
-
 .bets-tabs { display: flex; gap: 4px; background: var(--panel-2); border-radius: 100px; padding: 4px; width: fit-content; margin-bottom: 16px; flex-wrap: wrap; }
-.bets-tab { padding: 8px 18px; border-radius: 100px; border: none; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s; white-space: nowrap; }
+.bets-tab { padding: 8px 18px; border-radius: 100px; border: none; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; transition: .15s; }
 .bets-tab.active { background: var(--panel-3); color: var(--text); }
-.bets-tab:hover { color: var(--text); }
-
-/* Mobile table scroll */
 .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* Table Styles */
 .bets-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
 .bets-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--text-3); padding: 10px 12px; border-bottom: 1px solid var(--border-soft); white-space: nowrap; }
 .bets-table th:last-child, .bets-table td:last-child { text-align: right; }
-.bets-table th.num { text-align: right; }
-
 .bets-table td { padding: 11px 12px; border-bottom: 1px solid var(--border-soft); color: var(--text-2); white-space: nowrap; }
-.bets-table tbody tr:last-child td { border-bottom: none; }
-.bets-table tbody tr { transition: background .12s; }
-.bets-table tbody tr:hover { background: var(--panel-2); }
-
 .game-cell { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 600; }
-.game-cell svg { color: var(--text-3); flex-shrink: 0; }
 .user-cell { display: flex; align-items: center; gap: 6px; }
-.user-cell svg { color: var(--text-3); }
-.pos { color: var(--green); font-weight: 600; }
-.neg { color: var(--text-3); }
+
+/* Attractive Colors for Table */
+.pos { 
+  color: #00e701; /* Bright green */
+  font-weight: 800; 
+  text-shadow: 0 0 10px rgba(0,231,1,0.3);
+}
+.neg { 
+  color: #ff4d4d; /* Bright red */
+  font-weight: 800; 
+  text-shadow: 0 0 10px rgba(255,77,77,0.3);
+}
 .mult { color: var(--text); font-weight: 600; }
 
-/* ============================================================
-   SITE FOOTER
-   ============================================================ */
+/* Row Animation */
+@keyframes slideInDown {
+  0% { opacity: 0; transform: translateY(-15px); background-color: rgba(255,255,255,0.1); }
+  100% { opacity: 1; transform: translateY(0); background-color: transparent; }
+}
+.new-row {
+  animation: slideInDown 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* FOOTER */
 .site-footer { background: #0b1a24; border-top: 1px solid var(--border-soft); padding: 36px 20px 28px; margin-top: 8px; width: 100%; }
 .footer-inner { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
 .footer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
 .footer-col h4 { font-size: 13px; font-weight: 800; margin-bottom: 12px; }
 .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.footer-col a { font-size: 12.5px; color: var(--text-3); transition: color .12s; }
-.footer-col a:hover { color: var(--text); }
-
+.footer-col a { font-size: 12.5px; color: var(--text-3); }
 .footer-bottom { border-top: 1px solid var(--border-soft); padding-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
 .footer-bottom p { font-size: 12px; color: var(--text-3); max-width: 760px; line-height: 1.6; }
 .copyright { font-size: 12px; color: var(--text-3); }
-
 .footer-badges { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
 .seal { padding: 10px 16px; border-radius: 8px; background: var(--panel); border: 1px solid var(--border-soft); font-size: 11px; font-weight: 700; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
 .seal svg { color: var(--green); }
 
-/* ============================================================
-   RESPONSIVE FIXES
-   ============================================================ */
-@media (max-width: 1200px) {
-  .meta-layout { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 1024px) {
-  .sidebar { display: none; }
-}
-
+@media (max-width: 1200px) { .meta-layout { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) { .sidebar { display: none; } }
 @media (max-width: 860px) {
   .page { padding: 12px; }
   .game-frame-inner { flex-direction: column; }
   .game-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-soft); padding: 16px; }
-  
-  /* Fix board sizing and layout on mobile */
   .game-content { padding: 20px 12px; gap: 16px; width: 100%; }
   .board { width: 100%; max-width: 440px; gap: 6px; }
   .board-controls { width: 100%; max-width: 440px; }
-  
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
   .desc-thumb { display: none; }
-  
-  .meta-title-row { gap: 8px; }
-  .meta-live { flex: 100%; order: 3; margin-top: 8px; justify-content: space-between;}
 }
-
 @media (max-width: 560px) {
   .page { padding: 8px; }
   .topbar { padding: 0 12px; }
   .game-content { padding: 16px 8px; }
   .board { gap: 5px; }
-  
   .meta-title-row h1 { font-size: 18px; }
-  .desc-top { flex-direction: column; }
-  
   .footer-grid { grid-template-columns: 1fr; }
-  .rec-card { grid-template-columns: 40% 60%; }
-  
-  /* Make game footer elements wrap nicely */
   .game-footer-bar { flex-wrap: wrap; gap: 8px; justify-content: center; padding: 12px; }
-  .footer-center { display: none; } /* Hide center logo on small phones to save space */
+  .footer-center { display: none; }
   .btn-fairness { width: 100%; justify-content: center; }
 }
 </style>
 </head>
 <body>
 
-<div class="app">
-
-  <!-- ======================================================
-       LEFT SIDEBAR
-       ====================================================== -->
-  <aside class="sidebar">
-    <div class="sidebar-head">
-      <button class="icon-btn" aria-label="Toggle sidebar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-      <span class="brand-mark">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z" opacity=".95"/><path d="M12 2l3 6-3 14z" opacity=".45"/></svg>
-      </span>
-    </div>
-
-    <div class="product-switch">
-      <button class="product-btn active">Casino</button>
-      <button class="product-btn">Sports</button>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h10v15l-5-3-5 3z"/></svg>
-        Saved Games
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 17s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9z"/></svg>
-        Following
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4l9 6-9 6z"/></svg>
-        Continue Playing
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
-        Games For You
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
-        My Bets
-      </a>
-
-      <div class="nav-divider"></div>
-      <div class="nav-label">Games</div>
-
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l2.4 3.6L17 7l-3.3 3 1 4.6-4.7-2.3L5.3 14.6l1-4.6L3 7l4.6-1.4z"/></svg>
-        Exclusive
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l1.8 4.7L17 8l-4.2 3 1.4 5L10 13.3 5.8 16l1.4-5L3 8l5.2-1.3z"/></svg>
-        New Releases
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7" cy="8" r="1"/><circle cx="13" cy="12" r="1"/><path d="M3 9h14"/></svg>
-        Slots
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 18c3 0 5.5-2.2 5.5-5.3C15.5 8.5 10 2 10 2S4.5 8.5 4.5 12.7C4.5 15.8 7 18 10 18z"/></svg>
-        Originals
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="16" height="9" rx="2"/><path d="M6 3l2 3M14 3l-2 3"/></svg>
-        Live Casino
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M8 7.5l5 2.5-5 2.5z"/></svg>
-        Game Shows
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="10" height="14" rx="2"/><path d="M10 6v4"/></svg>
-        Blackjack
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="14" height="14" rx="2"/><circle cx="10" cy="10" r="3"/></svg>
-        Roulette
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h14M3 10h14M3 14h9"/></svg>
-        Publishers
-      </a>
-
-      <div class="nav-divider"></div>
-
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M3 9h14"/></svg>
-        Promotions
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h8v5a4 4 0 0 1-8 0zM10 13v3M7 18h6"/></svg>
-        Challenges
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10a6 6 0 0 1 12 0M4 10v3a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 1z"/></svg>
-        Affiliate
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h6v4a3 3 0 0 1-6 0zM10 11v3M7 17h6"/></svg>
-        VIP Club
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
-        Blog
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14v10H7l-4 3z"/></svg>
-        Forum
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l6 2v5c0 4-3 7-6 8-3-1-6-4-6-8V4z"/></svg>
-        Responsible Gambling
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>
-        Live Support
-      </a>
-    </nav>
-  </aside>
-
-  <!-- ======================================================
-       MAIN
-       ====================================================== -->
-  <div class="main">
-
-    <!-- Top bar -->
-    <header class="topbar">
-      <a href="#" class="brand-mark" aria-label="Home">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/><path d="M12 2l3 6-3 14z" opacity=".4"/></svg>
-      </a>
-      <div class="topbar-right">
-        <button class="btn btn-ghost">Sign In</button>
-        <button class="btn btn-green">Register</button>
+<!-- PRELOADER -->
+<div id="preloader-overlay">
+  <div id="security-screen">
+    <div class="security-content">
+      <div class="security-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        mysite.net
       </div>
-    </header>
+      <h1>Performing security verification</h1>
+      <p>This website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.</p>
+      <div class="verify-box">
+        <div class="verify-left">
+          <div class="spinner-light"></div>
+          <span>Verifying...</span>
+        </div>
+        <div class="verify-right">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#f38020" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 15.5c0 .8-.7 1.5-1.5 1.5H9c-.8 0-1.5-.7-1.5-1.5S8.2 14 9 14h6c.8 0 1.5.7 1.5 1.5zm-3-5c0 .8-.7 1.5-1.5 1.5H6c-.8 0-1.5-.7-1.5-1.5S5.2 9 6 9h6c.8 0 1.5.7 1.5 1.5zm6.5-5c0 .8-.7 1.5-1.5 1.5H4.5C3.7 7 3 6.3 3 5.5S3.7 4 4.5 4h14c.8 0 1.5.7 1.5 1.5z"/></svg>
+          <div>
+            <div style="font-weight:700;font-size:10px;letter-spacing:.5px;color:#333;">CLOUDFLARE</div>
+            <div style="font-size:9px;text-decoration:underline;">Privacy • Help</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="loading-screen">
+    <div class="loader-logo">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/><path d="M12 2l3 6-3 14z" opacity="0.4"/></svg>
+    </div>
+    <div class="spinner-dark"></div>
+  </div>
+</div>
 
-    <div class="page">
+<!-- MAIN GAME -->
+<div id="game-wrapper">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <span class="brand-mark"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z" opacity=".95"/><path d="M12 2l3 6-3 14z" opacity=".45"/></svg></span>
+      </div>
+      <div class="product-switch">
+        <button class="product-btn active">Casino</button>
+        <button class="product-btn">Sports</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h10v15l-5-3-5 3z"/></svg>Saved Games</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 17s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9z"/></svg>Following</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4l9 6-9 6z"/></svg>Continue Playing</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Games For You</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 8h6M7 12h4"/></svg>My Bets</a>
+        <div class="nav-divider"></div>
+        <div class="nav-label">Games</div>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l2.4 3.6L17 7l-3.3 3 1 4.6-4.7-2.3L5.3 14.6l1-4.6L3 7l4.6-1.4z"/></svg>Exclusive</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l1.8 4.7L17 8l-4.2 3 1.4 5L10 13.3 5.8 16l1.4-5L3 8l5.2-1.3z"/></svg>New Releases</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7" cy="8" r="1"/><circle cx="13" cy="12" r="1"/><path d="M3 9h14"/></svg>Slots</a>
+        <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 18c3 0 5.5-2.2 5.5-5.3C15.5 8.5 10 2 10 2S4.5 8.5 4.5 12.7C4.5 15.8 7 18 10 18z"/></svg>Originals</a>
+      </nav>
+    </aside>
 
-      <!-- ==================================================
-           GAME FRAME
-           ================================================== -->
-      <section class="game-frame">
-        <div class="game-frame-inner">
+    <div class="main">
+      <header class="topbar">
+        <a href="#" class="brand-mark" aria-label="Home">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/><path d="M12 2l3 6-3 14z" opacity=".4"/></svg>
+        </a>
+        <div class="topbar-right">
+          <div class="wallet-display">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            <span id="walletBalance">$1,000.00</span>
+          </div>
+          <button class="btn btn-green">Login</button>
+        </div>
+      </header>
 
-          <!-- Sidebar / bet controls -->
-          <aside class="game-sidebar">
-            <div class="seg-tabs">
-              <button class="seg-tab active">Manual</button>
-              <button class="seg-tab">Auto</button>
-            </div>
-
-            <div class="field">
-              <div class="input-row">
-                <div class="input-wrap">
-                  <span class="prefix">$</span>
-                  <input type="number" id="betAmount" value="1.00" step="0.01" min="0">
+      <div class="page">
+        <section class="game-frame">
+          <div class="game-frame-inner">
+            <aside class="game-sidebar">
+              <div class="seg-tabs">
+                <button class="seg-tab active">Manual</button>
+                <button class="seg-tab">Auto</button>
+              </div>
+              <div class="field">
+                <div class="input-row">
+                  <div class="input-wrap">
+                    <span class="prefix">$</span>
+                    <input type="number" id="betAmount" value="1.00" step="0.01" min="0">
+                  </div>
+                  <button class="chip-btn" id="halveBtn">½</button>
+                  <button class="chip-btn" id="doubleBtn">2×</button>
                 </div>
-                <button class="chip-btn" id="halveBtn">½</button>
-                <button class="chip-btn" id="doubleBtn">2×</button>
-              </div>
-              <div class="field-meta">
-                <span>Bet Amount</span>
-                <span id="betAmountUsd">$1.00</span>
-              </div>
-            </div>
-
-            <div class="mines-control">
-              <div class="mines-labels">
-                <span>Mines</span>
-                <span>Gems</span>
-              </div>
-              <div class="mines-slider-row">
-                <span class="mines-count" id="minesCount">3</span>
-                <input type="range" id="minesSlider" min="1" max="24" value="3">
-                <span class="mines-count" id="gemsCount">22</span>
-              </div>
-            </div>
-
-            <button class="btn-bet" id="betBtn">Bet</button>
-            <button class="btn-secondary" id="randomPickBtn" disabled>Random Pick</button>
-
-            <div class="field">
-              <div class="input-row">
-                <div class="input-wrap">
-                  <span class="prefix">$</span>
-                  <input type="text" id="profitInput" value="0.00" readonly>
+                <div class="field-meta">
+                  <span>Bet Amount</span>
+                  <span id="betAmountUsd">$1.00</span>
                 </div>
               </div>
-              <div class="field-meta">
-                <span id="profitLabel">Total Profit (1.00×)</span>
-                <span id="profitUsd">$0.00</span>
+              <div class="mines-control">
+                <div class="mines-labels">
+                  <span>Mines</span>
+                  <span>Gems</span>
+                </div>
+                <div class="mines-slider-row">
+                  <span class="mines-count" id="minesCount">3</span>
+                  <input type="range" id="minesSlider" min="1" max="24" value="3">
+                  <span class="mines-count" id="gemsCount">22</span>
+                </div>
               </div>
+              <button class="btn-bet" id="betBtn">Bet</button>
+              <button class="btn-secondary" id="randomPickBtn" disabled>Random Pick</button>
+              <div class="field">
+                <div class="input-row">
+                  <div class="input-wrap">
+                    <span class="prefix">$</span>
+                    <input type="text" id="profitInput" value="0.00" readonly>
+                  </div>
+                </div>
+                <div class="field-meta">
+                  <span id="profitLabel">Total Profit (1.00×)</span>
+                  <span id="profitUsd">$0.00</span>
+                </div>
+              </div>
+            </aside>
+
+            <div class="game-content">
+              <div class="board" id="board"></div>
+              <div class="board-controls">
+                <button class="text-btn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 10a7 7 0 1 0 2-4.9M3 3v4h4"/></svg>
+                  Repeat
+                </button>
+                <div class="multiplier-display">
+                  <span class="mult-label">Max Multiplier</span>
+                  <span class="mult-value" id="maxMultiplier">2,277.00×</span>
+                </div>
+                <button class="text-btn" disabled>
+                  Clear
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 10a7 7 0 1 1-2-4.9M17 3v4h-4"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-footer-bar">
+            <div class="footer-left">
+              <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.5 4.5L6 6M14 14l1.5 1.5M15.5 4.5L14 6M6 14l-1.5 1.5"/></svg></button>
+              <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="16" height="11" rx="1.5"/><path d="M2 17h16"/></svg></button>
+              <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 16V10M8 16V5M13 16v-8M18 16v-4"/></svg></button>
+              <button class="icon-btn" id="muteBtn" aria-label="Toggle sound" aria-pressed="false">
+                <svg id="soundOnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+                <svg id="soundOffIcon" style="display:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>
+              </button>
+            </div>
+            <div class="footer-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/></svg>
+              <span>MINES</span>
+            </div>
+            <button class="btn-fairness">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l6 2v5c0 4-3 7-6 8-3-1-6-4-6-8V4z"/><path d="M7.5 9.5l2 2 3.5-3.5"/></svg>
+              Fairness
+            </button>
+          </div>
+        </section>
+
+        <div class="meta-layout">
+          <section class="game-meta card">
+            <div class="publisher-row">
+              <div class="publisher-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/></svg>
+              </div>
+              <div class="publisher-info">
+                <a href="#" class="publisher-name">Originals</a>
+                <div class="publisher-followers"><strong>204.72K</strong> Followers</div>
+              </div>
+              <button class="btn btn-ghost small">♡ Follow</button>
+            </div>
+            <div class="meta-title-row">
+              <h1>Mines</h1>
+              <div class="meta-live">
+                <span><span class="live-dot"></span><strong id="livePlayingCount">2.48K</strong> Playing</span>
+                <span><strong>289.16K</strong> Saves</span>
+              </div>
+              <button class="btn btn-ghost small">♡ Save Game</button>
+            </div>
+            <div class="meta-tabs">
+              <button class="meta-tab">Game Statistics</button>
+              <button class="meta-tab active">Description</button>
+            </div>
+            <div class="desc-top">
+              <div class="desc-thumb"></div>
+              <div class="desc-tags">
+                <span class="badge">RTP: <strong>99.00%</strong></span>
+                <span class="badge">Mines</span>
+                <span class="badge">Provably Fair</span>
+                <span class="badge">Originals</span>
+                <span class="badge">Volatility Switch</span>
+              </div>
+            </div>
+            <div class="desc-text">
+              <h2>What is Mines?</h2>
+              <p>Mines is an online casino game where Minesweeper-style gameplay reveals mines or bombs with each wager placed on the 5×5 grid.</p>
+              <p>Featuring auto mode, fast game rounds, and various betting options, Mines is the original, in-house, provably fair version.</p>
+              <h2>Mines RTP and house edge</h2>
+              <p>Mines has a high return-to-player (RTP) percentage of 99.00%, which sets the house edge to 1.00%.</p>
+              <h2>How to play Mines</h2>
+              <p>Before each round, determine your bet size and decide how many mines on the board you want to set. You can choose to have between 1 and 24 mines hidden on the 25 tiles.</p>
+              <p>Every safe tile reveals a gem and increases your multiplier. After each successful pick, you can reveal another tile or use Cash Out to lock in your winnings. Selecting a mine ends the round immediately, and the wager is lost.</p>
+              <h2>Game Information</h2>
+              <table class="info-table">
+                <tr><td>Title</td><td>Mines</td></tr>
+                <tr><td>Provider</td><td>Originals</td></tr>
+                <tr><td>Game Type</td><td>Mines</td></tr>
+                <tr><td>Reels</td><td>5</td></tr>
+                <tr><td>Rows</td><td>5</td></tr>
+                <tr><td>RTP</td><td>99.00%</td></tr>
+                <tr><td>House Edge</td><td>1.00%</td></tr>
+                <tr><td>Theme</td><td>Mines</td></tr>
+              </table>
+            </div>
+          </section>
+
+          <aside class="recommendations card">
+            <div class="rec-header">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
+              Games For You
+              <svg class="chev" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg>
+            </div>
+            <div class="rec-list">
+              
+              <!-- CARD 1 -->
+              <div class="rec-card">
+                <img class="rec-thumb" src="https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=400&q=80" alt="Candy Swipe">
+                <div class="rec-content">
+                  <h3>Candy Swipe Matchwin</h3>
+                  <span class="rec-provider">Coreffect Interactive</span>
+                  <span class="rec-players"><span class="live-dot"></span><span class="random-players">329</span> playing</span>
+                </div>
+              </div>
+
+              <!-- CARD 2 -->
+              <div class="rec-card">
+                <img class="rec-thumb" src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=400&q=80" alt="Private Jet">
+                <div class="rec-content">
+                  <h3>Private Jet</h3>
+                  <span class="rec-provider">Paperclip Gaming</span>
+                  <span class="rec-players"><span class="live-dot"></span><span class="random-players">329</span> playing</span>
+                </div>
+              </div>
+
+              <!-- CARD 3 -->
+              <div class="rec-card">
+                <img class="rec-thumb" src="https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?auto=format&fit=crop&w=400&q=80" alt="Gates of Olympus">
+                <div class="rec-content">
+                  <h3>Gates of Olympus</h3>
+                  <span class="rec-provider">Pragmatic Play</span>
+                  <span class="rec-players"><span class="live-dot"></span><span class="random-players">564</span> playing</span>
+                </div>
+              </div>
+
+              <!-- CARD 4 -->
+              <div class="rec-card">
+                <img class="rec-thumb" src="https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?auto=format&fit=crop&w=400&q=80" alt="Midas Squares">
+                <div class="rec-content">
+                  <h3>Midas Squares</h3>
+                  <span class="rec-provider">Paperclip Gaming</span>
+                  <span class="rec-players"><span class="live-dot"></span><span class="random-players">290</span> playing</span>
+                </div>
+              </div>
+
             </div>
           </aside>
-
-          <!-- Board -->
-          <div class="game-content">
-            <div class="board" id="board"></div>
-
-            <div class="board-controls">
-              <button class="text-btn" disabled>
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 10a7 7 0 1 0 2-4.9M3 3v4h4"/></svg>
-                Repeat
-              </button>
-
-              <div class="multiplier-display">
-                <span class="mult-label">Max Multiplier</span>
-                <span class="mult-value" id="maxMultiplier">2,277.00×</span>
-              </div>
-
-              <button class="text-btn" disabled>
-                Clear
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 10a7 7 0 1 1-2-4.9M17 3v4h-4"/></svg>
-              </button>
-            </div>
-          </div>
         </div>
 
-        <!-- Game footer bar -->
-        <div class="game-footer-bar">
-          <div class="footer-left">
-            <button class="icon-btn" aria-label="Game settings">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.5 4.5L6 6M14 14l1.5 1.5M15.5 4.5L14 6M6 14l-1.5 1.5"/></svg>
-            </button>
-            <button class="icon-btn" aria-label="Theater mode">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="16" height="11" rx="1.5"/><path d="M2 17h16"/></svg>
-            </button>
-            <button class="icon-btn" aria-label="Live stats">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 16V10M8 16V5M13 16v-8M18 16v-4"/></svg>
-            </button>
-
-            <!-- Sound toggle -->
-            <button class="icon-btn" id="muteBtn" aria-label="Toggle sound" aria-pressed="false">
-              <svg id="soundOnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 9v6h4l5 4V5L8 9H4z"/>
-                <path d="M16.5 8.5a5 5 0 0 1 0 7"/>
-                <path d="M19 6a8.5 8.5 0 0 1 0 12"/>
-              </svg>
-              <svg id="soundOffIcon" style="display:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 9v6h4l5 4V5L8 9H4z"/>
-                <path d="M17 9l4 6M21 9l-4 6"/>
-              </svg>
-            </button>
+        <!-- BETS BOARD -->
+        <section class="bets-board card">
+          <div class="bets-tabs">
+            <button class="bets-tab">My Bets</button>
+            <button class="bets-tab">All Bets</button>
+            <button class="bets-tab active">High Rollers</button>
+            <button class="bets-tab">Race Leaderboard</button>
           </div>
-
-          <div class="footer-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/></svg>
-            <span>MINES</span>
-          </div>
-
-          <button class="btn-fairness">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l6 2v5c0 4-3 7-6 8-3-1-6-4-6-8V4z"/><path d="M7.5 9.5l2 2 3.5-3.5"/></svg>
-            Fairness
-          </button>
-        </div>
-      </section>
-
-      <!-- ==================================================
-           META LAYOUT
-           ================================================== -->
-      <div class="meta-layout">
-
-        <!-- Game meta -->
-        <section class="game-meta card">
-          <div class="publisher-row">
-            <div class="publisher-logo">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6-7 14L5 8l7-6z"/></svg>
-            </div>
-            <div class="publisher-info">
-              <a href="#" class="publisher-name">Originals</a>
-              <div class="publisher-followers"><strong>204.72K</strong> Followers</div>
-            </div>
-            <button class="btn btn-ghost small">♡ Follow</button>
-          </div>
-
-          <div class="meta-title-row">
-            <h1>Mines</h1>
-            <div class="meta-live">
-              <span><span class="live-dot"></span><strong id="livePlayingCount">2.48K</strong> Playing</span>
-              <span><strong>289.16K</strong> Saves</span>
-            </div>
-            <button class="btn btn-ghost small">♡ Save Game</button>
-          </div>
-
-          <div class="meta-tabs">
-            <button class="meta-tab">Game Statistics</button>
-            <button class="meta-tab active">Description</button>
-          </div>
-
-          <div class="desc-top">
-            <div class="desc-thumb"></div>
-            <div class="desc-tags">
-              <span class="badge">RTP: <strong>99.00%</strong></span>
-              <span class="badge">Mines</span>
-              <span class="badge">Provably Fair</span>
-              <span class="badge">Originals</span>
-              <span class="badge">Volatility Switch</span>
-            </div>
-          </div>
-
-          <div class="desc-text">
-            <h2>What is Mines?</h2>
-            <p>Mines is an online casino game where Minesweeper-style gameplay reveals mines or bombs with each wager placed on the 5×5 grid.</p>
-            <p>Featuring auto mode, fast game rounds, and various betting options, Mines is the original, in-house, provably fair version.</p>
-
-            <h2>Mines RTP and house edge</h2>
-            <p>Mines has a high return-to-player (RTP) percentage of 99.00%, which sets the house edge to 1.00%.</p>
-
-            <h2>How to play Mines</h2>
-            <p>Before each round, determine your bet size and decide how many mines on the board you want to set. You can choose to have between 1 and 24 mines hidden on the 25 tiles.</p>
-            <p>Every safe tile reveals a gem and increases your multiplier. After each successful pick, you can reveal another tile or use Cash Out to lock in your winnings. Selecting a mine ends the round immediately, and the wager is lost.</p>
-
-            <h2>The Mines grid and choosing your number of mines explained</h2>
-            <p>The grid has 25 spots, which you can adjust with your selections. You can choose between 1 and 24 mines by using the slider. This directly controls the volatility and balance between risk and reward.</p>
-            <p>More mines mean fewer wins but with larger potential multipliers. Fewer mines mean more frequent, yet smaller wins.</p>
-
-            <h2>Mines betting features: Manual, Auto Bet and hotkeys</h2>
-            <p>There are 3 features available when playing Mines:</p>
-            <ol style="padding-left:20px;color:var(--text-2);display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
-              <li>Manual mode lets you select each tile and decide how much you want to wager each round. You can cash out whenever you like.</li>
-              <li>The Auto feature uses your chosen settings and betting rules to play through the number of rounds you select. Advanced mode gives you additional options, including Reset or Increase By on wins or on losses.</li>
-              <li>You can enable hotkeys in the game settings to use keyboard shortcuts on your computer.</li>
-            </ol>
-
-            <h2>Is Mines provably fair?</h2>
-            <p>Mines uses provably fair technology alongside cryptographic verification tools that allow players to confirm outcomes. The game uses a random number generation process to determine mine placement before each round.</p>
-
-            <h2>Game Information</h2>
-            <table class="info-table">
-              <tr><td>Title</td><td>Mines</td></tr>
-              <tr><td>Provider</td><td>Originals</td></tr>
-              <tr><td>Game Type</td><td>Mines</td></tr>
-              <tr><td>Reels</td><td>5</td></tr>
-              <tr><td>Rows</td><td>5</td></tr>
-              <tr><td>RTP</td><td>99.00%</td></tr>
-              <tr><td>House Edge</td><td>1.00%</td></tr>
-              <tr><td>Theme</td><td>Mines</td></tr>
-              <tr><td>Bonus Buy Available?</td><td>No</td></tr>
+          <div class="table-responsive">
+            <table class="bets-table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>User</th>
+                  <th class="num">Time</th>
+                  <th class="num">Bet Amount</th>
+                  <th class="num">Multiplier</th>
+                  <th class="num">Payout</th>
+                </tr>
+              </thead>
+              <tbody id="betsTableBody">
+                <!-- Initial static rows -->
+                <tr>
+                  <td><span class="game-cell"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/></svg>Dynasty Speed Baccarat 10</span></td>
+                  <td><span class="user-cell"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>Hidden</span></td>
+                  <td class="num">8:56 PM</td>
+                  <td class="num">$1,140.00</td>
+                  <td class="num mult">1.95×</td>
+                  <td class="num pos">$2,223.00</td>
+                </tr>
+                <tr>
+                  <td><span class="game-cell"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/></svg>Salon Privé Blackjack K</span></td>
+                  <td><span class="user-cell"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>Hidden</span></td>
+                  <td class="num">8:56 PM</td>
+                  <td class="num">$5,021.66</td>
+                  <td class="num mult">0.00×</td>
+                  <td class="num neg">-$5,021.66</td>
+                </tr>
+                <tr>
+                  <td><span class="game-cell"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="6"/><path d="M10 6v4l3 2"/></svg>Mines</span></td>
+                  <td><span class="user-cell"><svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l2.5 5.5L18 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1.5z"/></svg>Antifare</span></td>
+                  <td class="num">8:56 PM</td>
+                  <td class="num">TRY 82,000</td>
+                  <td class="num mult">0.00×</td>
+                  <td class="num neg">-TRY 82,000</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </section>
 
-        <!-- Recommendations -->
-        <aside class="recommendations card">
-          <div class="rec-header">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
-            Games For You
-            <svg class="chev" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg>
-          </div>
-
-          <div class="rec-list">
-            <div class="rec-card">
-              <div class="rec-thumb g1"></div>
-              <div class="rec-info">
-                <h3>Candy Swipe Matchwin</h3>
-                <span class="rec-provider">Coreffect Interactive</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">329</span> playing</span>
+        <footer class="site-footer">
+          <div class="footer-inner">
+            <div class="footer-grid">
+              <div class="footer-col">
+                <h4>Casino</h4>
+                <ul>
+                  <li><a href="#">Casino Games</a></li>
+                  <li><a href="#">Slots</a></li>
+                  <li><a href="#">Live Casino</a></li>
+                  <li><a href="#">Roulette</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h4>Sports</h4>
+                <ul>
+                  <li><a href="#">Sportsbook</a></li>
+                  <li><a href="#">Live Sports</a></li>
+                  <li><a href="#">Soccer</a></li>
+                  <li><a href="#">Basketball</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                  <li><a href="#">Help Center</a></li>
+                  <li><a href="#">Fairness</a></li>
+                  <li><a href="#">Responsible Gambling</a></li>
+                  <li><a href="#">Live Support</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h4>About Us</h4>
+                <ul>
+                  <li><a href="#">VIP Club</a></li>
+                  <li><a href="#">Affiliate</a></li>
+                  <li><a href="#">Privacy Policy</a></li>
+                  <li><a href="#">Terms of Service</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h4>Payment Info</h4>
+                <ul>
+                  <li><a href="#">Deposit &amp; Withdrawals</a></li>
+                  <li><a href="#">Currency Guide</a></li>
+                  <li><a href="#">Crypto Guide</a></li>
+                  <li><a href="#">Supported Crypto</a></li>
+                </ul>
               </div>
             </div>
-            <div class="rec-card">
-              <div class="rec-thumb g2"></div>
-              <div class="rec-info">
-                <h3>Private Jet</h3>
-                <span class="rec-provider">Paperclip Gaming</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">329</span> playing</span>
+            <div class="footer-bottom">
+              <div class="footer-badges">
+                <span class="seal"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2l6 2v5c0 4-3 7-6 8-3-1-6-4-6-8V4z"/><path d="M7.5 9.5l2 2 3.5-3.5"/></svg>Certified</span>
+                <span class="seal"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>Licensed</span>
               </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g3"></div>
-              <div class="rec-info">
-                <h3>Gates of Olympus Super Scatter</h3>
-                <span class="rec-provider">Pragmatic Play</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">564</span> playing</span>
-              </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g4"></div>
-              <div class="rec-info">
-                <h3>Gates of Olympus 2500</h3>
-                <span class="rec-provider">Pragmatic Play</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">290</span> playing</span>
-              </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g5"></div>
-              <div class="rec-info">
-                <h3>Waylanders Forge</h3>
-                <span class="rec-provider">Valkyrie</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">351</span> playing</span>
-              </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g6"></div>
-              <div class="rec-info">
-                <h3>Midas Squares</h3>
-                <span class="rec-provider">Paperclip Gaming</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">159</span> playing</span>
-              </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g7"></div>
-              <div class="rec-info">
-                <h3>Big Bass Halloween Splash 1000</h3>
-                <span class="rec-provider">Pragmatic Play</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">213</span> playing</span>
-              </div>
-            </div>
-            <div class="rec-card">
-              <div class="rec-thumb g8"></div>
-              <div class="rec-info">
-                <h3>Buried By Night</h3>
-                <span class="rec-provider">Hacksaw Gaming</span>
-                <span class="rec-players"><span class="live-dot"></span><span class="random-players">115</span> playing</span>
-              </div>
+              <p>This is a demo interface created for layout purposes only. No real-money gambling takes place on this page. Play responsibly.</p>
+              <span class="copyright">© 2026 Casino. All rights reserved.</span>
             </div>
           </div>
-        </aside>
+        </footer>
       </div>
-
-      <!-- ==================================================
-           BETS BOARD
-           ================================================== -->
-      <section class="bets-board card">
-        <div class="bets-tabs">
-          <button class="bets-tab">My Bets</button>
-          <button class="bets-tab">All Bets</button>
-          <button class="bets-tab active">High Rollers</button>
-          <button class="bets-tab">Race Leaderboard</button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="bets-table">
-            <thead>
-              <tr>
-                <th>Game</th>
-                <th>User</th>
-                <th class="num">Time</th>
-                <th class="num">Bet Amount</th>
-                <th class="num">Multiplier</th>
-                <th class="num">Payout</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/></svg>
-                    Dynasty Speed Baccarat 10
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
-                    Hidden
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">$1,140.00</td>
-                <td class="num mult">1.95×</td>
-                <td class="num pos">$2,223.00</td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/></svg>
-                    Salon Privé Blackjack K
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
-                    Hidden
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">$5,021.66</td>
-                <td class="num mult">0.00×</td>
-                <td class="num neg">-$5,021.66</td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="6"/><path d="M10 6v4l3 2"/></svg>
-                    Mines
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l2.5 5.5L18 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1.5z"/></svg>
-                    Antifare
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">TRY 82,000</td>
-                <td class="num mult">0.00×</td>
-                <td class="num neg">-TRY 82,000</td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3 9h14"/></svg>
-                    Hot to Burn
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
-                    Hidden
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">$2.50</td>
-                <td class="num mult">1,000.00×</td>
-                <td class="num pos">$2,500.00</td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="6"/><circle cx="10" cy="10" r="2"/></svg>
-                    Roleta Ao Vivo
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
-                    Hidden
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">$1,700.00</td>
-                <td class="num mult">1.06×</td>
-                <td class="num pos">$1,800.00</td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="game-cell">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M6 3l2 3M14 3l-2 3"/></svg>
-                    Dragon Tiger Live
-                  </span>
-                </td>
-                <td>
-                  <span class="user-cell">
-                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
-                    Hidden
-                  </span>
-                </td>
-                <td class="num">8:56 PM</td>
-                <td class="num">$1,298.98</td>
-                <td class="num mult">0.00×</td>
-                <td class="num neg">-$1,298.98</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ==================================================
-           SITE FOOTER
-           ================================================== -->
-      <footer class="site-footer">
-        <div class="footer-inner">
-          <div class="footer-grid">
-            <div class="footer-col">
-              <h4>Casino</h4>
-              <ul>
-                <li><a href="#">Casino Games</a></li>
-                <li><a href="#">Slots</a></li>
-                <li><a href="#">Live Casino</a></li>
-                <li><a href="#">Roulette</a></li>
-                <li><a href="#">Blackjack</a></li>
-                <li><a href="#">Poker</a></li>
-                <li><a href="#">Publishers</a></li>
-                <li><a href="#">Promos &amp; Competitions</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>Sports</h4>
-              <ul>
-                <li><a href="#">Sportsbook</a></li>
-                <li><a href="#">Live Sports</a></li>
-                <li><a href="#">Soccer</a></li>
-                <li><a href="#">Basketball</a></li>
-                <li><a href="#">Tennis</a></li>
-                <li><a href="#">Esports</a></li>
-                <li><a href="#">Bet Bonuses</a></li>
-                <li><a href="#">Sports Rules</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>Support</h4>
-              <ul>
-                <li><a href="#">Help Center</a></li>
-                <li><a href="#">Fairness</a></li>
-                <li><a href="#">Responsible Gambling</a></li>
-                <li><a href="#">Gambling Helpline</a></li>
-                <li><a href="#">Live Support</a></li>
-                <li><a href="#">Self Exclusion</a></li>
-                <li><a href="#">Law Enforcement Request</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>About Us</h4>
-              <ul>
-                <li><a href="#">VIP Club</a></li>
-                <li><a href="#">Affiliate</a></li>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">AML Policy</a></li>
-                <li><a href="#">Terms of Service</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>Payment Info</h4>
-              <ul>
-                <li><a href="#">Deposit &amp; Withdrawals</a></li>
-                <li><a href="#">Currency Guide</a></li>
-                <li><a href="#">Crypto Guide</a></li>
-                <li><a href="#">Supported Crypto</a></li>
-                <li><a href="#">How to Use the Vault</a></li>
-                <li><a href="#">How Much to Bet With</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="footer-bottom">
-            <div class="footer-badges">
-              <span class="seal">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2l6 2v5c0 4-3 7-6 8-3-1-6-4-6-8V4z"/><path d="M7.5 9.5l2 2 3.5-3.5"/></svg>
-                GameCheck Certified
-              </span>
-              <span class="seal">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>
-                Curaçao Licensed
-              </span>
-              <span class="seal">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 16V4h14v12z"/><path d="M7 8h6M7 11h4"/></svg>
-                Tanzanite Certified
-              </span>
-            </div>
-            <p>This is a demo interface created for layout purposes only. No real-money gambling takes place on this page. Play responsibly.</p>
-            <span class="copyright">© 2026 Casino. All rights reserved.</span>
-          </div>
-        </div>
-      </footer>
-
-    </div><!-- /page -->
-  </div><!-- /main -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
-   SOUND ENGINE  (Web Audio API – no external files)
+   PRELOADER LOGIC
+   ============================================================ */
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('security-screen').style.display = 'none';
+    var loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'flex';
+    
+    setTimeout(function() {
+      var preloader = document.getElementById('preloader-overlay');
+      preloader.style.opacity = '0';
+      
+      setTimeout(function() {
+        preloader.style.display = 'none';
+        var gameWrapper = document.getElementById('game-wrapper');
+        gameWrapper.style.display = 'block';
+        window.dispatchEvent(new Event('resize'));
+      }, 600);
+      
+    }, 2000);
+  }, 2500);
+});
+
+/* ============================================================
+   SOUND ENGINE
    ============================================================ */
 var Sound = (function () {
   'use strict';
-
-  var ctx = null;
-  var master = null;
-  var muted = false;
+  var ctx = null, master = null, muted = false;
 
   function ensureCtx() {
     if (!ctx) {
@@ -1256,25 +752,17 @@ var Sound = (function () {
     return ctx;
   }
 
-  function ready() {
-    if (muted) return null;
-    return ensureCtx();
-  }
+  function ready() { return muted ? null : ensureCtx(); }
 
   function toneAt(freq, when, dur, type, vol, slideTo) {
     var c = ctx;
-    var osc = c.createOscillator();
-    var g = c.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.setValueAtTime(freq, when);
+    var osc = c.createOscillator(); var g = c.createGain();
+    osc.type = type || 'sine'; osc.frequency.setValueAtTime(freq, when);
     if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, when + dur);
     g.gain.setValueAtTime(0.0001, when);
     g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.001), when + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    osc.connect(g);
-    g.connect(master);
-    osc.start(when);
-    osc.stop(when + dur + 0.02);
+    osc.connect(g); g.connect(master); osc.start(when); osc.stop(when + dur + 0.02);
   }
 
   function noiseBurst(when, dur, vol, hpFreq, lpFreq) {
@@ -1283,33 +771,20 @@ var Sound = (function () {
     var buf = c.createBuffer(1, len, c.sampleRate);
     var data = buf.getChannelData(0);
     for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
-    var src = c.createBufferSource();
-    src.buffer = buf;
-    var hp = c.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.value = hpFreq || 800;
-    var lp = c.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = lpFreq || 5000;
+    var src = c.createBufferSource(); src.buffer = buf;
+    var hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = hpFreq || 800;
+    var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = lpFreq || 5000;
     var g = c.createGain();
-    g.gain.setValueAtTime(vol, when);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    src.connect(hp);
-    hp.connect(lp);
-    lp.connect(g);
-    g.connect(master);
-    src.start(when);
+    g.gain.setValueAtTime(vol, when); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(master); src.start(when);
   }
 
   function playGem(step) {
     if (!ready()) return;
-    var now = ctx.currentTime;
-    var semis = Math.min(step, 24);
-    var base = 523.25 * Math.pow(2, semis / 12);
+    var now = ctx.currentTime, semis = Math.min(step, 24), base = 523.25 * Math.pow(2, semis / 12);
     toneAt(base, now, 0.20, 'triangle', 0.30);
     toneAt(base * 1.5, now + 0.025, 0.24, 'sine', 0.16);
     toneAt(base * 2, now + 0.05, 0.28, 'sine', 0.09);
-    toneAt(base * 3.2, now + 0.02, 0.12, 'sine', 0.05);
     noiseBurst(now, 0.015, 0.05, 2500, 8000);
   }
 
@@ -1322,19 +797,12 @@ var Sound = (function () {
     var buf = ctx.createBuffer(1, len, ctx.sampleRate);
     var data = buf.getChannelData(0);
     for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
-    var src = ctx.createBufferSource();
-    src.buffer = buf;
-    var lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.setValueAtTime(2000, now);
-    lp.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(2000, now); lp.frequency.exponentialRampToValueAtTime(150, now + 0.4);
     var g = ctx.createGain();
-    g.gain.setValueAtTime(0.5, now);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
-    src.connect(lp);
-    lp.connect(g);
-    g.connect(master);
-    src.start(now);
+    g.gain.setValueAtTime(0.5, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+    src.connect(lp); lp.connect(g); g.connect(master); src.start(now);
   }
 
   function playBet() {
@@ -1350,7 +818,6 @@ var Sound = (function () {
     toneAt(987.77, now, 0.10, 'square', 0.16);
     toneAt(1318.51, now + 0.10, 0.38, 'square', 0.16);
     toneAt(2637, now + 0.11, 0.42, 'sine', 0.07);
-    toneAt(3951, now + 0.14, 0.30, 'sine', 0.04);
   }
 
   function playStart() {
@@ -1360,43 +827,31 @@ var Sound = (function () {
     var buf = ctx.createBuffer(1, len, ctx.sampleRate);
     var data = buf.getChannelData(0);
     for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (i / len);
-    var src = ctx.createBufferSource();
-    src.buffer = buf;
-    var bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.Q.value = 1.6;
-    bp.frequency.setValueAtTime(400, now);
-    bp.frequency.exponentialRampToValueAtTime(3200, now + 0.26);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6;
+    bp.frequency.setValueAtTime(400, now); bp.frequency.exponentialRampToValueAtTime(3200, now + 0.26);
     var g = ctx.createGain();
-    g.gain.setValueAtTime(0.18, now);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
-    src.connect(bp);
-    bp.connect(g);
-    g.connect(master);
-    src.start(now);
+    g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+    src.connect(bp); bp.connect(g); g.connect(master); src.start(now);
   }
 
   function playClick() {
     if (!ready()) return;
-    var now = ctx.currentTime;
-    toneAt(900, now, 0.04, 'triangle', 0.07);
-    noiseBurst(now, 0.02, 0.04, 3000, 9000);
+    toneAt(900, ctx.currentTime, 0.04, 'triangle', 0.07);
   }
 
   var lastTick = 0;
   function playTick() {
     var t = (window.performance && performance.now) ? performance.now() : Date.now();
-    if (t - lastTick < 45) return;
-    lastTick = t;
+    if (t - lastTick < 45) return; lastTick = t;
     if (!ready()) return;
     toneAt(1300, ctx.currentTime, 0.02, 'square', 0.035);
   }
 
   function playError() {
     if (!ready()) return;
-    var now = ctx.currentTime;
-    toneAt(220, now, 0.11, 'square', 0.16);
-    toneAt(165, now + 0.12, 0.16, 'square', 0.16);
+    toneAt(220, ctx.currentTime, 0.11, 'square', 0.16);
+    toneAt(165, ctx.currentTime + 0.12, 0.16, 'square', 0.16);
   }
 
   return {
@@ -1408,50 +863,107 @@ var Sound = (function () {
   };
 })();
 
-/* Unlock audio on first user interaction */
 document.addEventListener('pointerdown', function () { Sound.unlock(); }, { once: true });
-document.addEventListener('keydown', function () { Sound.unlock(); }, { once: true });
 
 /* ============================================================
-   LIVE PLAYER COUNTER (Makes it feel active)
+   DYNAMIC BETS TABLE (SIMULATOR)
    ============================================================ */
-(function updateLiveCounters() {
-  // Main "Playing" count
-  var liveCountEl = document.getElementById('livePlayingCount');
-  var currentMainPlayers = 2480; // Starts at 2.48K
+(function runBetsSimulator() {
+  var tableBody = document.getElementById('betsTableBody');
+  if (!tableBody) return;
 
-  function formatK(num) {
-    return (num / 1000).toFixed(2) + 'K';
+  var games = [
+    { name: "Mines", icon: '<circle cx="10" cy="10" r="6"/><path d="M10 6v4l3 2"/>' },
+    { name: "Salon Privé Blackjack K", icon: '<rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/>' },
+    { name: "Dynasty Speed Baccarat 10", icon: '<rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M8 7h4"/>' },
+    { name: "Gates of Olympus", icon: '<path d="M10 2l2.4 3.6L17 7l-3.3 3 1 4.6-4.7-2.3L5.3 14.6l1-4.6L3 7l4.6-1.4z"/>' },
+    { name: "Crash", icon: '<path d="M3 16V10M8 16V5M13 16v-8M18 16v-4"/>' },
+    { name: "Dice", icon: '<rect x="3" y="3" width="14" height="14" rx="2"/><circle cx="7" cy="7" r="1"/><circle cx="13" cy="13" r="1"/>' }
+  ];
+
+  var users = ["Hidden", "Antifare", "Lucky_Strike", "HighRoller99", "CryptoKing", "MoonBoy", "DegenGambler", "Whale_Alert", "GamblerX", "StarPlayer"];
+  var currencies = ["$", "TRY ", "€", "₿"];
+
+  function formatMoney(amount, currency) {
+    if (currency === "₿") return "₿" + amount.toFixed(4);
+    return currency + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // Update random game counts in the "Games For You" list
-  var randomPlayerEls = document.querySelectorAll('.random-players');
-  
-  setInterval(function () {
-    // Fluctuate main count by -3 to +5
-    currentMainPlayers += Math.floor(Math.random() * 9) - 3;
-    if (currentMainPlayers < 2350) currentMainPlayers = 2350;
-    if (currentMainPlayers > 2650) currentMainPlayers = 2650;
-    liveCountEl.textContent = formatK(currentMainPlayers);
+  function generateRandomRow() {
+    var game = games[Math.floor(Math.random() * games.length)];
+    var user = users[Math.floor(Math.random() * users.length)];
+    var isWin = Math.random() > 0.4; // 60% chance to win, makes it look fun
+    var currency = currencies[Math.floor(Math.random() * currencies.length)];
+    
+    // Generate bet amount based on currency
+    var bet = 10;
+    if (currency === "TRY ") bet = Math.floor(Math.random() * 100000) + 1000;
+    else if (currency === "₿") bet = (Math.random() * 0.5) + 0.01;
+    else bet = (Math.random() * 5000) + 1;
 
-    // Fluctuate small game counts slightly
-    randomPlayerEls.forEach(function (el) {
-      var count = parseInt(el.textContent, 10);
-      count += Math.floor(Math.random() * 7) - 3;
-      if (count < 50) count = 50;
-      el.textContent = count;
-    });
-  }, 2500); // Update every 2.5 seconds
+    var multiplier = 0;
+    var payout = 0;
+    var payoutClass = "";
+    var payoutSign = "";
+
+    if (isWin) {
+      multiplier = (Math.random() * (Math.random() > 0.8 ? 50 : 5)) + 1.05; // Big wins sometimes, small often
+      payout = bet * multiplier;
+      payoutClass = "pos";
+      payoutSign = "";
+    } else {
+      multiplier = 0;
+      payout = bet;
+      payoutClass = "neg";
+      payoutSign = "-";
+    }
+
+    // Random time (last 10 minutes)
+    var d = new Date(Date.now() - Math.floor(Math.random() * 600000));
+    var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    var isHidden = user === "Hidden";
+    
+    // Construct HTML
+    var tr = document.createElement('tr');
+    tr.className = "new-row";
+
+    var iconSvg = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">${game.icon}</svg>`;
+    var userIcon = isHidden 
+      ? `<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>`
+      : `<svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l2.5 5.5L18 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1.5z"/></svg>`;
+
+    tr.innerHTML = `
+      <td><span class="game-cell">${iconSvg}${game.name}</span></td>
+      <td><span class="user-cell">${userIcon}${user}</span></td>
+      <td class="num">${timeStr}</td>
+      <td class="num">${formatMoney(bet, currency)}</td>
+      <td class="num mult">${multiplier.toFixed(2)}×</td>
+      <td class="num ${payoutClass}">${payoutSign}${formatMoney(payout, currency)}</td>
+    `;
+
+    return tr;
+  }
+
+  // Add a new row every 3 seconds
+  setInterval(function() {
+    var newRow = generateRandomRow();
+    tableBody.insertBefore(newRow, tableBody.firstChild);
+    
+    // Keep only top 8 rows to prevent the page from scrolling too much
+    if (tableBody.children.length > 8) {
+      tableBody.removeChild(tableBody.lastChild);
+    }
+  }, 3000);
+
 })();
 
 /* ============================================================
-   MINES GAME LOGIC
+   MINES GAME LOGIC + WALLET
    ============================================================ */
 (function () {
   'use strict';
-
   var TOTAL_TILES = 25;
-
+  
   var board        = document.getElementById('board');
   var minesSlider  = document.getElementById('minesSlider');
   var minesCount   = document.getElementById('minesCount');
@@ -1467,7 +979,9 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
   var halveBtn     = document.getElementById('halveBtn');
   var doubleBtn    = document.getElementById('doubleBtn');
 
-  /* ---------- sound toggle ---------- */
+  var walletBalanceEl = document.getElementById('walletBalance');
+  var balance = 1000.00; 
+
   var muteBtn      = document.getElementById('muteBtn');
   var soundOnIcon  = document.getElementById('soundOnIcon');
   var soundOffIcon = document.getElementById('soundOffIcon');
@@ -1481,7 +995,6 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
     soundOnIcon.style.display  = m ? 'none' : '';
     soundOffIcon.style.display = m ? '' : 'none';
     muteBtn.setAttribute('aria-pressed', m ? 'true' : 'false');
-    muteBtn.setAttribute('aria-label', m ? 'Unmute sound' : 'Mute sound');
   }
   applyMuteUI();
 
@@ -1493,28 +1006,10 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
     if (!next) Sound.playClick();
   });
 
-  /* ---------- state ---------- */
-  var state = {
-    playing: false,
-    mineSet: new Set(),
-    picks: 0,
-    bet: 0,
-    tiles: []
-  };
+  var state = { playing: false, mineSet: new Set(), picks: 0, bet: 0, tiles: [] };
 
-  var GEM_SVG =
-    '<svg viewBox="0 0 24 24" width="55%" height="55%">' +
-      '<path fill="#4de3ff" d="M12 2l8 7-8 13L4 9z"/>' +
-      '<path fill="#a5f1ff" opacity=".65" d="M12 2l4 7-4 13z"/>' +
-      '<path fill="#0b6f8a" opacity=".35" d="M4 9h16l-8 13z"/>' +
-    '</svg>';
-
-  var MINE_SVG =
-    '<svg viewBox="0 0 24 24" width="55%" height="55%">' +
-      '<circle cx="12" cy="13" r="7" fill="#ff5b5b"/>' +
-      '<circle cx="9.5" cy="10.5" r="2" fill="#ffb3b3" opacity=".7"/>' +
-      '<path d="M12 2v4M4.5 6.5l2.4 2.4M19.5 6.5l-2.4 2.4M12 20v2" stroke="#ffb0b0" stroke-width="2" stroke-linecap="round"/>' +
-    '</svg>';
+  var GEM_SVG = '<svg viewBox="0 0 24 24" width="55%" height="55%"><path fill="#4de3ff" d="M12 2l8 7-8 13L4 9z"/><path fill="#a5f1ff" opacity=".65" d="M12 2l4 7-4 13z"/><path fill="#0b6f8a" opacity=".35" d="M4 9h16l-8 13z"/></svg>';
+  var MINE_SVG = '<svg viewBox="0 0 24 24" width="55%" height="55%"><circle cx="12" cy="13" r="7" fill="#ff5b5b"/><circle cx="9.5" cy="10.5" r="2" fill="#ffb3b3" opacity=".7"/><path d="M12 2v4M4.5 6.5l2.4 2.4M19.5 6.5l-2.4 2.4M12 20v2" stroke="#ffb0b0" stroke-width="2" stroke-linecap="round"/></svg>';
 
   function combo(n, k) {
     if (k < 0 || k > n) return 0;
@@ -1522,64 +1017,44 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
     for (var i = 1; i <= k; i++) r = r * (n - k + i) / i;
     return r;
   }
-
-  function multiplierFor(picks, mines) {
-    if (picks <= 0) return 1;
-    return 0.99 * combo(TOTAL_TILES, picks) / combo(TOTAL_TILES - mines, picks);
+  function multiplierFor(picks, mines) { return picks <= 0 ? 1 : 0.99 * combo(TOTAL_TILES, picks) / combo(TOTAL_TILES - mines, picks); }
+  function fmtMoney(n) { 
+    var isNeg = n < 0;
+    var absN = Math.abs(n);
+    var str = '$' + (Math.round(absN * 100) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return isNeg ? '-' + str : str;
   }
-
-  function fmtMoney(n) {
-    return '$' + (Math.round(n * 100) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-
   function fmtMult(n) { return n.toFixed(2) + '×'; }
+  function getBet() { var v = parseFloat(betInput.value); return isNaN(v) || v < 0 ? 0 : v; }
+  function getMines() { return parseInt(minesSlider.value, 10); }
 
-  function getBet() {
-    var v = parseFloat(betInput.value);
-    return isNaN(v) || v < 0 ? 0 : v;
+  function updateWalletUI() {
+    walletBalanceEl.textContent = fmtMoney(balance);
+    if (balance < 0) walletBalanceEl.style.color = 'var(--red)';
+    else walletBalanceEl.style.color = 'var(--green)';
   }
 
-  function getMines() {
-    return parseInt(minesSlider.value, 10);
-  }
-
-  /* ---------- build board ---------- */
   for (var i = 0; i < TOTAL_TILES; i++) {
     (function (index) {
       var tile = document.createElement('button');
-      tile.className = 'tile';
-      tile.type = 'button';
-      tile.setAttribute('aria-label', 'Tile ' + (index + 1));
+      tile.className = 'tile'; tile.type = 'button'; tile.setAttribute('aria-label', 'Tile ' + (index + 1));
       tile.innerHTML = '<span class="tile-front"></span>';
       tile.addEventListener('click', function () { onTileClick(index); });
-      board.appendChild(tile);
-      state.tiles.push(tile);
+      board.appendChild(tile); state.tiles.push(tile);
     })(i);
   }
 
   function updateSliderVisual() {
-    var min = parseInt(minesSlider.min, 10);
-    var max = parseInt(minesSlider.max, 10);
-    var val = getMines();
-    var pct = ((val - min) / (max - min)) * 100;
+    var pct = ((getMines() - 1) / 23) * 100;
     minesSlider.style.setProperty('--pct', pct + '%');
   }
 
   function updateMinesUI() {
     var mines = getMines();
-    minesCount.textContent = mines;
-    gemsCount.textContent = TOTAL_TILES - mines;
+    minesCount.textContent = mines; gemsCount.textContent = TOTAL_TILES - mines;
     updateSliderVisual();
-    updateMaxMultiplier();
-  }
-
-  function updateMaxMultiplier() {
-    var mines = getMines();
     var maxMult = multiplierFor(TOTAL_TILES - mines, mines);
-    maxMultiplierEl.textContent = maxMult.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }) + '×';
+    maxMultiplierEl.textContent = maxMult.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '×';
   }
 
   function updateProfitUI() {
@@ -1587,18 +1062,15 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
     var mult = multiplierFor(state.picks, mines);
     var bet = state.bet || getBet();
     var profit = bet * mult - bet;
-
     profitLabel.textContent = 'Total Profit (' + fmtMult(mult) + ')';
     profitInput.value = profit.toFixed(2);
     profitUsd.textContent = fmtMoney(profit);
-
     betUsd.textContent = fmtMoney(getBet());
   }
 
   function resetTiles() {
     state.tiles.forEach(function (t) {
-      t.className = 'tile';
-      t.disabled = false;
+      t.className = 'tile'; t.disabled = false;
       t.innerHTML = '<span class="tile-front"></span>';
     });
     board.classList.remove('shake');
@@ -1606,35 +1078,30 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
 
   function startRound() {
     var bet = getBet();
-    if (bet <= 0) {
+    if (bet <= 0) { Sound.playError(); betInput.focus(); return; }
+    
+    if (bet > balance) {
       Sound.playError();
-      betInput.focus();
+      alert("Insufficient balance! Please lower your bet.");
       return;
     }
 
-    var mines = getMines();
-    var positions = new Set();
-    while (positions.size < mines) {
-      positions.add(Math.floor(Math.random() * TOTAL_TILES));
-    }
+    balance -= bet;
+    updateWalletUI();
 
-    state.mineSet = positions;
-    state.playing = true;
-    state.picks = 0;
-    state.bet = bet;
-
+    var mines = getMines(); var positions = new Set();
+    while (positions.size < mines) positions.add(Math.floor(Math.random() * TOTAL_TILES));
+    state.mineSet = positions; state.playing = true; state.picks = 0; state.bet = bet;
+    
     resetTiles();
-    betBtn.textContent = 'Cash Out';
-    betBtn.classList.add('cashout');
+    betBtn.textContent = 'Cash Out'; betBtn.classList.add('cashout');
     randomBtn.disabled = false;
-
     updateProfitUI();
     Sound.playStart();
   }
 
   function endRound(won) {
     state.playing = false;
-
     state.tiles.forEach(function (t, idx) {
       if (state.mineSet.has(idx) && !t.classList.contains('revealed')) {
         t.classList.add('revealed', 'mine', 'dim');
@@ -1650,25 +1117,25 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
       profitUsd.textContent = fmtMoney(-state.bet);
     }
 
-    betBtn.textContent = 'Bet';
-    betBtn.classList.remove('cashout');
+    betBtn.textContent = 'Bet'; betBtn.classList.remove('cashout');
     randomBtn.disabled = true;
   }
 
   function cashOut() {
     if (!state.playing) return;
-    var mines = getMines();
-    var mult = multiplierFor(state.picks, mines);
+    var mult = multiplierFor(state.picks, getMines());
     var payout = state.bet * mult;
+    
+    balance += payout;
+    updateWalletUI();
 
     profitInput.value = (payout - state.bet).toFixed(2);
     profitUsd.textContent = fmtMoney(payout);
-
+    
     state.playing = false;
     state.tiles.forEach(function (t) { t.disabled = true; });
-
-    betBtn.textContent = 'Bet';
-    betBtn.classList.remove('cashout');
+    
+    betBtn.textContent = 'Bet'; betBtn.classList.remove('cashout');
     randomBtn.disabled = true;
     Sound.playCashout();
   }
@@ -1677,73 +1144,46 @@ document.addEventListener('keydown', function () { Sound.unlock(); }, { once: tr
     if (!state.playing) return;
     var tile = state.tiles[index];
     if (tile.classList.contains('revealed')) return;
-
     var isMine = state.mineSet.has(index);
     tile.classList.add('revealed');
-
     if (isMine) {
       tile.classList.add('mine');
       tile.innerHTML = '<span class="tile-front">' + MINE_SVG + '</span>';
-      Sound.playMine();
-      endRound(false);
+      Sound.playMine(); endRound(false);
     } else {
       tile.classList.add('gem');
       tile.innerHTML = '<span class="tile-front">' + GEM_SVG + '</span>';
-      state.picks++;
-      updateProfitUI();
-      Sound.playGem(state.picks);
+      state.picks++; updateProfitUI(); Sound.playGem(state.picks);
     }
   }
 
-  minesSlider.addEventListener('input', function () {
-    updateMinesUI();
-    if (!state.playing) updateProfitUI();
-    Sound.playTick();
-  });
-
-  betInput.addEventListener('input', function () {
-    betUsd.textContent = fmtMoney(getBet());
-    if (!state.playing) updateProfitUI();
-  });
+  minesSlider.addEventListener('input', function () { updateMinesUI(); if (!state.playing) updateProfitUI(); Sound.playTick(); });
+  betInput.addEventListener('input', function () { betUsd.textContent = fmtMoney(getBet()); if (!state.playing) updateProfitUI(); });
 
   halveBtn.addEventListener('click', function () {
     if (state.playing) return;
-    var v = getBet() / 2;
-    betInput.value = v > 0 ? v.toFixed(2) : '0.00';
-    betUsd.textContent = fmtMoney(getBet());
-    updateProfitUI();
-    Sound.playClick();
+    var v = getBet() / 2; betInput.value = v > 0 ? v.toFixed(2) : '0.00';
+    betUsd.textContent = fmtMoney(getBet()); updateProfitUI(); Sound.playClick();
   });
 
   doubleBtn.addEventListener('click', function () {
     if (state.playing) return;
-    var v = getBet() * 2;
-    betInput.value = v.toFixed(2);
-    betUsd.textContent = fmtMoney(getBet());
-    updateProfitUI();
-    Sound.playClick();
+    betInput.value = (getBet() * 2).toFixed(2);
+    betUsd.textContent = fmtMoney(getBet()); updateProfitUI(); Sound.playClick();
   });
 
   betBtn.addEventListener('click', function () {
-    if (state.playing) {
-      cashOut();
-    } else {
-      Sound.playBet();
-      startRound();
-    }
+    if (state.playing) cashOut(); else { Sound.playBet(); startRound(); }
   });
 
   randomBtn.addEventListener('click', function () {
     if (!state.playing) return;
     var unrevealed = [];
-    state.tiles.forEach(function (t, idx) {
-      if (!t.classList.contains('revealed')) unrevealed.push(idx);
-    });
-    if (!unrevealed.length) return;
-    var pick = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-    onTileClick(pick);
+    state.tiles.forEach(function (t, idx) { if (!t.classList.contains('revealed')) unrevealed.push(idx); });
+    if (unrevealed.length) onTileClick(unrevealed[Math.floor(Math.random() * unrevealed.length)]);
   });
 
+  updateWalletUI();
   updateMinesUI();
   updateProfitUI();
 })();
